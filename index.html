@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rental Property Manager</title>
     <style>
         :root {
@@ -20,7 +20,8 @@
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
@@ -31,80 +32,191 @@
         h1 {
             text-align: center;
             color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
         }
 
         .card {
             background: var(--card);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 10px;
         }
 
         .form-group {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
         }
 
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
         input[type="text"], input[type="tel"], select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border);
-            border-radius: 4px;
+            border-radius: 8px;
             box-sizing: border-box;
+            font-size: 16px; /* Prevents iOS zoom on focus */
+            background-color: var(--bg);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
 
         .checkbox-group {
             display: flex;
             align-items: center;
             gap: 10px;
+            padding: 10px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
         }
 
         button {
-            padding: 10px 15px;
+            padding: 12px 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.95rem;
             color: white;
-            transition: opacity 0.2s;
+            transition: transform 0.1s, opacity 0.2s;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
 
-        button:hover { opacity: 0.9; }
-        .btn-primary { background-color: var(--primary); width: 100%; }
-        .btn-success { background-color: var(--success); font-size: 0.85em; }
-        .btn-danger { background-color: var(--danger); font-size: 0.85em; }
-        .btn-edit { background-color: #64748b; font-size: 0.85em; }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background-color: var(--primary); padding: 14px; font-size: 1.1rem;}
+        .btn-success { background-color: var(--success); }
+        .btn-danger { background-color: var(--danger); }
+        .btn-edit { background-color: #64748b; }
 
+        /* Desktop Table Styles */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         th, td {
             text-align: left;
-            padding: 12px;
+            padding: 15px 12px;
             border-bottom: 1px solid var(--border);
         }
 
         th {
-            background-color: #f1f5f9;
+            background-color: var(--bg);
             font-weight: 600;
+            color: #475569;
         }
 
-        .status-behind { color: var(--danger); font-weight: bold; }
-        .status-current { color: var(--success); font-weight: bold; }
+        .status-behind { color: var(--danger); font-weight: 700; }
+        .status-current { color: var(--success); font-weight: 700; }
         
         .action-buttons {
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
         }
 
-        .hidden { display: none; }
+        .action-buttons a {
+            text-decoration: none;
+            flex: 1;
+        }
+
+        /* Mobile Responsive Table styling */
+        @media screen and (max-width: 768px) {
+            table {
+                border: 0;
+            }
+            
+            table caption {
+                font-size: 1.3em;
+            }
+            
+            table thead {
+                border: none;
+                clip: rect(0 0 0 0);
+                height: 1px;
+                margin: -1px;
+                overflow: hidden;
+                padding: 0;
+                position: absolute;
+                width: 1px;
+            }
+            
+            table tr {
+                border: 1px solid var(--border);
+                display: block;
+                margin-bottom: 20px;
+                border-radius: 12px;
+                background-color: var(--bg);
+                padding: 10px;
+            }
+            
+            table td {
+                border-bottom: 1px solid var(--border);
+                display: block;
+                font-size: 0.95em;
+                text-align: right;
+                padding: 12px 10px;
+            }
+            
+            table td::before {
+                /*
+                * aria-label has no advantage, it won't be read inside a table
+                content: attr(aria-label);
+                */
+                content: attr(data-label);
+                float: left;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 0.85em;
+                color: #64748b;
+            }
+            
+            table td:last-child {
+                border-bottom: 0;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            table td.action-cell {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding-top: 15px;
+            }
+
+            table td.action-cell::before {
+                display: none; /* Hide labels for button rows on mobile to save space */
+            }
+        }
     </style>
 </head>
 <body>
@@ -148,7 +260,7 @@
         </form>
     </div>
 
-    <div class="card" style="overflow-x: auto;">
+    <div class="card">
         <h2>Property List</h2>
         <table id="propertyTable">
             <thead>
@@ -194,21 +306,25 @@
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${prop.address}</td>
-                <td><strong>${prop.tenant}</strong><br><small>${prop.phone}</small></td>
-                <td>${prop.dueDate}</td>
-                <td class="${statusClass}">${statusText}</td>
-                <td class="action-buttons">
-                    <a href="sms:${cleanPhone}?body=${encodeURIComponent(msgThankYou)}" style="text-decoration: none;">
-                        <button class="btn-success">Send Thank You</button>
-                    </a>
-                    <a href="sms:${cleanPhone}?body=${encodeURIComponent(msgReminder)}" style="text-decoration: none;">
-                        <button class="btn-danger">Send Reminder</button>
-                    </a>
+                <td data-label="Address">${prop.address}</td>
+                <td data-label="Tenant"><strong>${prop.tenant}</strong><br><small style="color: #64748b;">${prop.phone}</small></td>
+                <td data-label="Due Date">${prop.dueDate}</td>
+                <td data-label="Status" class="${statusClass}">${statusText}</td>
+                <td data-label="Messaging" class="action-cell">
+                    <div class="action-buttons">
+                        <a href="sms:${cleanPhone}?body=${encodeURIComponent(msgThankYou)}">
+                            <button class="btn-success">Send Thank You</button>
+                        </a>
+                        <a href="sms:${cleanPhone}?body=${encodeURIComponent(msgReminder)}">
+                            <button class="btn-danger">Send Reminder</button>
+                        </a>
+                    </div>
                 </td>
-                <td class="action-buttons">
-                    <button class="btn-edit" onclick="editProperty(${prop.id})">Edit</button>
-                    <button class="btn-danger" onclick="deleteProperty(${prop.id})">Delete</button>
+                <td data-label="Manage" class="action-cell">
+                    <div class="action-buttons">
+                        <button class="btn-edit" onclick="editProperty(${prop.id})">Edit</button>
+                        <button class="btn-danger" style="background-color: #94a3b8;" onclick="deleteProperty(${prop.id})">Delete</button>
+                    </div>
                 </td>
             `;
             tableBody.appendChild(tr);
@@ -255,7 +371,7 @@
             
             formTitle.textContent = "Edit Property";
             submitBtn.textContent = "Update Property";
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
