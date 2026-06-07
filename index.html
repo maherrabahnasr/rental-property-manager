@@ -224,7 +224,6 @@
         const pass = document.getElementById('password').value;
 
         // Encrypted verification of "ThisISMyPassword" (Shifted Byte Array)
-        // This ensures the word "ThisISMyPassword" never appears in the code.
         const secretHash = [89, 109, 110, 120, 78, 88, 82, 126, 85, 102, 120, 120, 124, 116, 119, 105];
         
         let isPassValid = false;
@@ -249,10 +248,12 @@
 
 
     // --- APPLICATION LOGIC ---
-    // Seeded database structure mapped from uploaded Excel fields
+    // Seeded database structure 
     let properties = [
-        { id: 1, address: 'Taylor, Michigan', tenant: 'Shantoy', phone: '3135550101', rent: '1000', dueDate: '1st', isBehind: false },
-        { id: 2, address: 'Dearborn Heights', tenant: 'Pending Tenant', phone: '3135550102', rent: '1400', dueDate: '5th', isBehind: true }
+        { id: 1, address: 'Taylor, Michigan', tenant: 'Shantoy', phone: '555-0101', rent: '1000', dueDate: '1st', isBehind: false },
+        { id: 2, address: 'Dearborn Heights', tenant: 'Pending Tenant', phone: '555-0102', rent: '1400', dueDate: '1st', isBehind: false },
+        { id: 3, address: '3416 Syracuse', tenant: 'Bilal', phone: '555-0103', rent: '1200', dueDate: '1st', isBehind: false },
+        { id: 4, address: '1307 Walnut', tenant: 'Yong', phone: '555-0104', rent: '1500', dueDate: '1st', isBehind: false }
     ];
 
     const form = document.getElementById('propertyForm');
@@ -267,7 +268,6 @@
             const statusText = prop.isBehind ? 'Behind' : 'Current';
             const cleanPhone = prop.phone.replace(/\D/g, '');
 
-            // Dynamic Canned Messages including Tenant Name and Rent Amount
             const msgThankYou = `Hi ${prop.tenant}, just confirming I received the $${prop.rent} rent for this month. Thank you!`;
             const msgReminder = `Hello ${prop.tenant}, I haven't received the $${prop.rent} rent for this month yet. Please let me know when you plan to send it.`;
 
