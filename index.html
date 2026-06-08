@@ -427,13 +427,22 @@
     const formTitle = document.getElementById('formTitle');
     const submitBtn = document.getElementById('submitBtn');
 
-    window.sendSms = function(phone, message) {
+    // Updated sendSms function to handle message types properly
+    window.sendSms = function(phone, msgType) {
         if (!phone || phone.trim() === '') {
             alert('Please click the "Edit" button to add a phone number for this tenant before sending a message.');
             return;
         }
+        
+        let messageText = "";
+        if (msgType === 'thankyou') {
+            messageText = "Rent received, thank you";
+        } else if (msgType === 'reminder') {
+            messageText = "Hey, when can I expect this month's rent?";
+        }
+        
         const cleanPhone = phone.replace(/\D/g, '');
-        window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+        window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(messageText)}`;
     };
 
     function renderTable() {
@@ -441,15 +450,11 @@
         properties.forEach(prop => {
             const statusClass = prop.isBehind ? 'badge-behind' : 'badge-current';
             const statusText = prop.isBehind ? 'Behind' : 'Current';
-            
-            // Text Message Content
-            const msgThankYou = "Rent received, thank you";
-            const msgReminder = "Hey, when can I expect this month's rent?";
-
             const phoneDisplay = prop.phone ? prop.phone : '<span style="color:var(--danger); font-style:italic;">No phone added</span>';
 
             const tr = document.createElement('tr');
             
+            // Buttons now pass 'thankyou' or 'reminder' instead of raw strings to avoid apostrophe breaking the code
             tr.innerHTML = `
                 <td data-label="Address"><strong>${prop.address}</strong></td>
                 <td data-label="Tenant Details">
@@ -460,8 +465,8 @@
                 <td data-label="Due Date">${prop.dueDate}</td>
                 <td data-label="Status"><span class="badge ${statusClass}">${statusText}</span></td>
                 <td data-label="Messaging" class="action-buttons">
-                    <button class="btn-success" onclick="sendSms('${prop.phone}', '${msgThankYou}')">Rent Received</button>
-                    <button class="btn-danger" onclick="sendSms('${prop.phone}', '${msgReminder}')">Send Reminder</button>
+                    <button class="btn-success" onclick="sendSms('${prop.phone}', 'thankyou')">Rent Received</button>
+                    <button class="btn-danger" onclick="sendSms('${prop.phone}', 'reminder')">Send Reminder</button>
                 </td>
                 <td data-label="Manage" class="action-buttons">
                     <button class="btn-edit" onclick="editProperty(${prop.id})">Edit</button>
