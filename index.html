@@ -69,7 +69,7 @@
             margin-bottom: 20px;
         }
 
-        input[type="text"], input[type="password"], input[type="tel"], input[type="number"], select {
+        input[type="text"], input[type="password"], input[type="tel"], input[type="number"] {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border);
@@ -126,6 +126,63 @@
         }
 
         .hidden { display: none !important; }
+
+        /* Responsive Mobile Table Styles */
+        @media screen and (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                margin-bottom: 20px;
+                padding: 15px;
+                background: #fff;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            }
+            td {
+                border: none;
+                position: relative;
+                padding-left: 40%;
+                text-align: right;
+                margin-bottom: 10px;
+            }
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 35%;
+                padding-right: 10px;
+                text-align: left;
+                font-weight: 600;
+                color: #475569;
+            }
+            /* Stack buttons on mobile */
+            .action-buttons {
+                flex-direction: column;
+                align-items: flex-end;
+                width: 100%;
+            }
+            .action-buttons button {
+                width: 100%;
+                margin-bottom: 5px;
+                padding: 12px; /* larger tap targets for mobile */
+            }
+            td[data-label="Messaging"], td[data-label="Manage"] {
+                padding-left: 0;
+                text-align: center;
+                border-top: 1px solid var(--border);
+                padding-top: 15px;
+            }
+            td[data-label="Messaging"]::before, td[data-label="Manage"]::before {
+                display: none; /* Hide label for button groups on mobile to save space */
+            }
+        }
     </style>
 </head>
 <body>
@@ -174,11 +231,7 @@
                 </div>
                 <div>
                     <label>Rent Due Date</label>
-                    <select id="dueDate" required>
-                        <option value="1st">1st of the month</option>
-                        <option value="5th">5th of the month</option>
-                        <option value="15th">15th of the month</option>
-                    </select>
+                    <input type="text" id="dueDate" required placeholder="e.g., 1st, 15th, or End of Month">
                 </div>
             </div>
             <div class="form-group">
@@ -191,7 +244,7 @@
         </form>
     </div>
 
-    <div class="card" style="overflow-x: auto;">
+    <div class="card">
         <h2>Property List</h2>
         <table id="propertyTable">
             <thead>
@@ -303,23 +356,25 @@
             const statusClass = prop.isBehind ? 'status-behind' : 'status-current';
             const statusText = prop.isBehind ? 'Behind' : 'Current';
             
-            const msgThankYou = `Hi ${prop.tenant}, just confirming I received the $${prop.rent} rent for this month. Thank you!`;
-            const msgReminder = `Hello ${prop.tenant}, I haven't received the $${prop.rent} rent for this month yet. Please let me know when you plan to send it.`;
+            const msgThankYou = "Rent received, thank you";
+            const msgReminder = "Hey, when can I expect this month's rent?";
 
             const phoneDisplay = prop.phone ? prop.phone : '<span style="color:#94a3b8; font-style:italic;">No phone added</span>';
 
             const tr = document.createElement('tr');
+            
+            // Added data-label attributes to each td for the mobile view
             tr.innerHTML = `
-                <td>${prop.address}</td>
-                <td><strong>${prop.tenant}</strong><br><small>${phoneDisplay}</small></td>
-                <td>$${prop.rent}</td>
-                <td>${prop.dueDate}</td>
-                <td class="${statusClass}">${statusText}</td>
-                <td class="action-buttons">
+                <td data-label="Address">${prop.address}</td>
+                <td data-label="Tenant Details"><strong>${prop.tenant}</strong><br><small>${phoneDisplay}</small></td>
+                <td data-label="Rent">$${prop.rent}</td>
+                <td data-label="Due Date">${prop.dueDate}</td>
+                <td data-label="Status" class="${statusClass}">${statusText}</td>
+                <td data-label="Messaging" class="action-buttons">
                     <button class="btn-success" onclick="sendSms('${prop.phone}', '${msgThankYou}')">Send Thank You</button>
                     <button class="btn-danger" onclick="sendSms('${prop.phone}', '${msgReminder}')">Send Reminder</button>
                 </td>
-                <td class="action-buttons">
+                <td data-label="Manage" class="action-buttons">
                     <button class="btn-edit" onclick="editProperty(${prop.id})">Edit</button>
                     <button class="btn-danger" onclick="deleteProperty(${prop.id})">Delete</button>
                 </td>
@@ -338,7 +393,7 @@
             tenant: document.getElementById('tenant').value,
             rent: document.getElementById('rent').value,
             phone: document.getElementById('phone').value,
-            dueDate: document.getElementById('dueDate').value,
+            dueDate: document.getElementById('dueDate').value, // Now captures flexible text
             isBehind: document.getElementById('isBehind').checked
         };
 
