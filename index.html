@@ -42,11 +42,24 @@
         }
 
         h1 {
-            text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 0;
             background: linear-gradient(135deg, var(--primary), #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
         }
 
         .card {
@@ -65,17 +78,18 @@
             padding: 40px 30px;
         }
         
-        #loginError {
-            color: var(--danger);
+        .alert-box {
             text-align: center;
             margin-bottom: 15px;
             font-size: 0.9em;
             font-weight: 500;
             display: none;
-            background: #fef2f2;
             padding: 10px;
             border-radius: 8px;
         }
+        
+        .alert-danger { color: var(--danger); background: #fef2f2; }
+        .alert-success { color: var(--success); background: #ecfdf5; }
 
         .form-group {
             display: grid;
@@ -121,10 +135,7 @@
             border: 1px solid var(--border);
         }
 
-        .checkbox-group label {
-            margin: 0;
-            cursor: pointer;
-        }
+        .checkbox-group label { margin: 0; cursor: pointer; }
 
         button {
             padding: 12px 20px;
@@ -194,64 +205,53 @@
         th:first-child { border-top-left-radius: 8px; }
         th:last-child { border-top-right-radius: 8px; }
 
-        td {
-            font-size: 0.95rem;
-            vertical-align: middle;
-        }
+        td { font-size: 0.95rem; vertical-align: middle; }
 
         .tenant-name { font-weight: 600; color: var(--text-main); }
         .tenant-phone { color: var(--text-muted); font-size: 0.85rem; margin-top: 2px; }
 
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+        .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
 
         .hidden { display: none !important; }
 
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .modal-card {
+            width: 100%; max-width: 450px;
+            margin: 20px;
+        }
+
         /* Responsive Mobile Table Styles */
         @media screen and (max-width: 768px) {
+            .header-container { flex-direction: column; align-items: stretch; text-align: center; }
+            .header-actions { justify-content: center; }
             table, thead, tbody, th, td, tr { display: block; }
             thead tr { position: absolute; top: -9999px; left: -9999px; }
             tr {
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                margin-bottom: 20px;
-                padding: 15px;
-                background: #fff;
+                border: 1px solid var(--border); border-radius: var(--radius);
+                margin-bottom: 20px; padding: 15px; background: #fff;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
             td {
-                border: none;
-                position: relative;
-                padding: 10px 0 10px 40%;
-                text-align: right;
-                border-bottom: 1px solid #f3f4f6;
+                border: none; position: relative; padding: 10px 0 10px 40%;
+                text-align: right; border-bottom: 1px solid #f3f4f6;
             }
             td:last-child { border-bottom: none; }
             td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 35%;
-                padding-right: 10px;
-                text-align: left;
-                font-weight: 600;
-                color: var(--text-muted);
-                font-size: 0.85rem;
-                text-transform: uppercase;
+                content: attr(data-label); position: absolute; left: 0; width: 35%;
+                padding-right: 10px; text-align: left; font-weight: 600;
+                color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;
             }
-            .action-buttons {
-                flex-direction: column;
-                align-items: flex-end;
-                width: 100%;
-            }
+            .action-buttons { flex-direction: column; align-items: flex-end; width: 100%; }
             .action-buttons button { width: 100%; margin-bottom: 8px; padding: 12px; }
-            td[data-label="Messaging"], td[data-label="Manage"] {
-                padding-left: 0;
-                text-align: center;
-            }
+            td[data-label="Messaging"], td[data-label="Manage"] { padding-left: 0; text-align: center; }
             td[data-label="Messaging"]::before, td[data-label="Manage"]::before { display: none; }
         }
     </style>
@@ -259,8 +259,8 @@
 <body>
 
 <div id="loginView" class="card">
-    <h1 style="margin-bottom: 20px; font-size: 1.8rem;">Property Login</h1>
-    <div id="loginError">Invalid username or password.</div>
+    <h1 style="text-align: center; margin-bottom: 20px; font-size: 1.8rem;">Property Login</h1>
+    <div id="loginError" class="alert-box alert-danger">Invalid username or password.</div>
     <form id="loginForm">
         <div class="form-group" style="grid-template-columns: 1fr; gap: 15px;">
             <div>
@@ -277,7 +277,13 @@
 </div>
 
 <div id="appView" class="container hidden">
-    <h1 id="welcomeMessage">Rental Property Manager</h1>
+    <div class="header-container">
+        <h1 id="welcomeMessage">Rental Property Manager</h1>
+        <div class="header-actions">
+            <button class="btn-edit" onclick="openPasswordModal()">Change Password</button>
+            <button class="btn-danger" onclick="logout()">Log Out</button>
+        </div>
+    </div>
 
     <div class="card">
         <h2 id="formTitle" style="margin-top:0; margin-bottom: 20px;">Add / Edit Property</h2>
@@ -336,7 +342,58 @@
     </div>
 </div>
 
+<div id="passwordModal" class="modal-overlay hidden">
+    <div class="card modal-card">
+        <h2 style="margin-top:0; margin-bottom:20px;">Change Password</h2>
+        <div id="pwdError" class="alert-box alert-danger"></div>
+        <div id="pwdSuccess" class="alert-box alert-success"></div>
+        
+        <form id="changePwdForm">
+            <div class="form-group" style="grid-template-columns: 1fr; gap: 15px;">
+                <div>
+                    <label>Current Password</label>
+                    <input type="password" id="currentPwd" required>
+                </div>
+                <div>
+                    <label>New Password</label>
+                    <input type="password" id="newPwd" required>
+                </div>
+                <div>
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPwd" required>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" class="btn-edit" style="flex: 1;" onclick="closePasswordModal()">Cancel</button>
+                <button type="submit" class="btn-primary" style="flex: 2;">Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    // --- UTILITY ENCRYPTION FUNCTIONS ---
+    // Hashes a string into an array shifted by +5
+    function encryptPassword(str) {
+        let hash = [];
+        for(let i=0; i<str.length; i++) {
+            hash.push(str.charCodeAt(i) + 5);
+        }
+        return hash;
+    }
+
+    // Verifies an input string against a saved array hash
+    function verifyPassword(inputStr, savedHash) {
+        if(inputStr.length !== savedHash.length) return false;
+        for(let i=0; i<inputStr.length; i++) {
+            if(inputStr.charCodeAt(i) + 5 !== savedHash[i]) return false;
+        }
+        return true;
+    }
+
+    // --- STATE MANAGEMENT ---
+    let currentUser = null; // Tracks who is logged in
+
     // --- POPULATE DATE DROPDOWN ---
     const dueDateSelect = document.getElementById('dueDate');
     for(let i = 1; i <= 31; i++) {
@@ -351,7 +408,7 @@
         dueDateSelect.appendChild(option);
     }
 
-    // --- LOGIN LOGIC ---
+    // --- AUTHENTICATION LOGIC ---
     const loginForm = document.getElementById('loginForm');
     const loginView = document.getElementById('loginView');
     const appView = document.getElementById('appView');
@@ -363,38 +420,98 @@
         const user = document.getElementById('username').value.trim().toLowerCase();
         const pass = document.getElementById('password').value;
 
-        const maherHash = [115, 116]; // 'no' shifted +5
-        const maisuneHash = [126, 106, 120]; // 'yes' shifted +5
+        // Load passwords from local storage or use defaults ('no' and 'yes' shifted)
+        const storedMaher = JSON.parse(localStorage.getItem('pwd_maher'));
+        const storedMaisune = JSON.parse(localStorage.getItem('pwd_maisune'));
+        
+        const maherHash = storedMaher || [115, 116]; 
+        const maisuneHash = storedMaisune || [126, 106, 120]; 
         
         let isValidLogin = false;
         let displayName = "";
 
         if (user === 'maher') {
-            if (pass.length === maherHash.length) {
-                isValidLogin = true;
-                for (let i = 0; i < pass.length; i++) {
-                    if (pass.charCodeAt(i) + 5 !== maherHash[i]) { isValidLogin = false; break; }
-                }
-            }
+            isValidLogin = verifyPassword(pass, maherHash);
             displayName = "Maher";
         } else if (user === 'maisune') {
-            if (pass.length === maisuneHash.length) {
-                isValidLogin = true;
-                for (let i = 0; i < pass.length; i++) {
-                    if (pass.charCodeAt(i) + 5 !== maisuneHash[i]) { isValidLogin = false; break; }
-                }
-            }
+            isValidLogin = verifyPassword(pass, maisuneHash);
             displayName = "Maisune";
         }
 
         if (isValidLogin) {
+            currentUser = user; // Save active user session
             welcomeMessage.textContent = `Welcome, ${displayName}`;
             loginView.classList.add('hidden');
             appView.classList.remove('hidden');
+            loginForm.reset();
+            loginError.style.display = 'none';
             renderTable();
         } else {
             loginError.style.display = 'block';
         }
+    });
+
+    function logout() {
+        currentUser = null;
+        appView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+    }
+
+    // --- CHANGE PASSWORD LOGIC ---
+    const passwordModal = document.getElementById('passwordModal');
+    const changePwdForm = document.getElementById('changePwdForm');
+    const pwdError = document.getElementById('pwdError');
+    const pwdSuccess = document.getElementById('pwdSuccess');
+
+    function openPasswordModal() {
+        passwordModal.classList.remove('hidden');
+        changePwdForm.reset();
+        pwdError.style.display = 'none';
+        pwdSuccess.style.display = 'none';
+    }
+
+    function closePasswordModal() {
+        passwordModal.classList.add('hidden');
+    }
+
+    changePwdForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const currentPwd = document.getElementById('currentPwd').value;
+        const newPwd = document.getElementById('newPwd').value;
+        const confirmPwd = document.getElementById('confirmPwd').value;
+
+        // Fetch current active hash
+        const storedHash = JSON.parse(localStorage.getItem(`pwd_${currentUser}`));
+        const activeHash = storedHash || (currentUser === 'maher' ? [115, 116] : [126, 106, 120]);
+
+        // Verify current password is correct
+        if (!verifyPassword(currentPwd, activeHash)) {
+            pwdError.textContent = "Current password is incorrect.";
+            pwdError.style.display = 'block';
+            pwdSuccess.style.display = 'none';
+            return;
+        }
+
+        // Verify new passwords match
+        if (newPwd !== confirmPwd) {
+            pwdError.textContent = "New passwords do not match.";
+            pwdError.style.display = 'block';
+            pwdSuccess.style.display = 'none';
+            return;
+        }
+
+        // Encrypt and save new password
+        const newHash = encryptPassword(newPwd);
+        localStorage.setItem(`pwd_${currentUser}`, JSON.stringify(newHash));
+        
+        pwdError.style.display = 'none';
+        pwdSuccess.textContent = "Password updated successfully!";
+        pwdSuccess.style.display = 'block';
+        
+        changePwdForm.reset();
+        
+        // Auto-close modal after success
+        setTimeout(closePasswordModal, 1500);
     });
 
     // --- APPLICATION LOGIC & LOCAL STORAGE ---
@@ -414,7 +531,6 @@
         { id: 13, address: '17663 Clarann', tenant: 'Justin Chall', phone: '', rent: '1200', dueDate: '1st', isBehind: false }
     ];
 
-    // Load from localStorage or use defaults
     let storedData = localStorage.getItem('rentalPropertiesDB');
     let properties = storedData ? JSON.parse(storedData) : defaultProperties;
 
@@ -427,7 +543,6 @@
     const formTitle = document.getElementById('formTitle');
     const submitBtn = document.getElementById('submitBtn');
 
-    // Updated sendSms function to handle message types properly
     window.sendSms = function(phone, msgType) {
         if (!phone || phone.trim() === '') {
             alert('Please click the "Edit" button to add a phone number for this tenant before sending a message.');
@@ -453,8 +568,6 @@
             const phoneDisplay = prop.phone ? prop.phone : '<span style="color:var(--danger); font-style:italic;">No phone added</span>';
 
             const tr = document.createElement('tr');
-            
-            // Buttons now pass 'thankyou' or 'reminder' instead of raw strings to avoid apostrophe breaking the code
             tr.innerHTML = `
                 <td data-label="Address"><strong>${prop.address}</strong></td>
                 <td data-label="Tenant Details">
@@ -499,7 +612,7 @@
             properties.push(newProperty);
         }
 
-        saveToLocalStorage(); // Save changes
+        saveToLocalStorage();
         form.reset();
         document.getElementById('editId').value = '';
         renderTable();
@@ -514,7 +627,6 @@
             document.getElementById('rent').value = prop.rent;
             document.getElementById('phone').value = prop.phone;
             
-            // Ensure the dropdown handles the correct option
             const dateSelect = document.getElementById('dueDate');
             let found = Array.from(dateSelect.options).some(opt => opt.value === prop.dueDate);
             if (!found) {
@@ -536,7 +648,7 @@
     window.deleteProperty = function(id) {
         if (confirm('Are you sure you want to delete this property?')) {
             properties = properties.filter(p => p.id !== id);
-            saveToLocalStorage(); // Save changes
+            saveToLocalStorage();
             renderTable();
         }
     };
