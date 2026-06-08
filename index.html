@@ -149,10 +149,10 @@
 </div>
 
 <div id="appView" class="container hidden">
-    <h1>Welcome, Maher | Rental Property Manager</h1>
+    <h1 id="welcomeMessage">Welcome | Rental Property Manager</h1>
 
     <div class="card">
-        <h2 id="formTitle">Add New Property & Tenant</h2>
+        <h2 id="formTitle">Add / Edit Property</h2>
         <form id="propertyForm">
             <input type="hidden" id="editId">
             <div class="form-group">
@@ -170,7 +170,7 @@
                 </div>
                 <div>
                     <label>Phone Number</label>
-                    <input type="tel" id="phone" required placeholder="555-123-4567">
+                    <input type="tel" id="phone" placeholder="Add phone number here">
                 </div>
                 <div>
                     <label>Rent Due Date</label>
@@ -217,27 +217,46 @@
     const loginView = document.getElementById('loginView');
     const appView = document.getElementById('appView');
     const loginError = document.getElementById('loginError');
+    const welcomeMessage = document.getElementById('welcomeMessage');
 
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        const user = document.getElementById('username').value.trim();
+        const user = document.getElementById('username').value.trim().toLowerCase();
         const pass = document.getElementById('password').value;
 
-        // Encrypted verification of "ThisISMyPassword" (Shifted Byte Array)
-        const secretHash = [89, 109, 110, 120, 78, 88, 82, 126, 85, 102, 120, 120, 124, 116, 119, 105];
+        // Encrypted verification using +5 Shifted Byte Array
+        const maherHash = [115, 116]; // 'no'
+        const maisuneHash = [126, 106, 120]; // 'yes'
         
-        let isPassValid = false;
-        if (pass.length === secretHash.length) {
-            isPassValid = true;
-            for (let i = 0; i < pass.length; i++) {
-                if (pass.charCodeAt(i) + 5 !== secretHash[i]) {
-                    isPassValid = false;
-                    break;
+        let isValidLogin = false;
+        let displayName = "";
+
+        if (user === 'maher') {
+            if (pass.length === maherHash.length) {
+                isValidLogin = true;
+                for (let i = 0; i < pass.length; i++) {
+                    if (pass.charCodeAt(i) + 5 !== maherHash[i]) {
+                        isValidLogin = false;
+                        break;
+                    }
                 }
             }
+            displayName = "Maher";
+        } else if (user === 'maisune') {
+            if (pass.length === maisuneHash.length) {
+                isValidLogin = true;
+                for (let i = 0; i < pass.length; i++) {
+                    if (pass.charCodeAt(i) + 5 !== maisuneHash[i]) {
+                        isValidLogin = false;
+                        break;
+                    }
+                }
+            }
+            displayName = "Maisune";
         }
 
-        if (user.toLowerCase() === 'maher' && isPassValid) {
+        if (isValidLogin) {
+            welcomeMessage.textContent = `Welcome, ${displayName} | Rental Property Manager`;
             loginView.classList.add('hidden');
             appView.classList.remove('hidden');
             renderTable();
@@ -246,14 +265,22 @@
         }
     });
 
-
     // --- APPLICATION LOGIC ---
-    // Seeded database structure 
+    // Pre-populated with the 13 properties
     let properties = [
-        { id: 1, address: 'Taylor, Michigan', tenant: 'Shantoy', phone: '555-0101', rent: '1000', dueDate: '1st', isBehind: false },
-        { id: 2, address: 'Dearborn Heights', tenant: 'Pending Tenant', phone: '555-0102', rent: '1400', dueDate: '1st', isBehind: false },
-        { id: 3, address: '3416 Syracuse', tenant: 'Bilal', phone: '555-0103', rent: '1200', dueDate: '1st', isBehind: false },
-        { id: 4, address: '1307 Walnut', tenant: 'Yong', phone: '555-0104', rent: '1500', dueDate: '1st', isBehind: false }
+        { id: 1, address: '3416 Syracuse', tenant: 'Bilal Alawieh', phone: '', rent: '800', dueDate: '1st', isBehind: false },
+        { id: 2, address: '11271 Ziegler', tenant: 'Shantoy Childress', phone: '', rent: '1500', dueDate: '1st', isBehind: false },
+        { id: 3, address: '4476 Jackson', tenant: 'Ben Guzman', phone: '', rent: '1400', dueDate: '1st', isBehind: false },
+        { id: 4, address: '1307 Walnut', tenant: 'Yong Los', phone: '', rent: '1300', dueDate: '1st', isBehind: false },
+        { id: 5, address: '7741 Monroe', tenant: 'Amber and Allen Robinson', phone: '', rent: '1400', dueDate: '1st', isBehind: false },
+        { id: 6, address: '4429 Bedford', tenant: 'Anthony Lanning and Kayla Riggleman', phone: '', rent: '1300', dueDate: '1st', isBehind: false },
+        { id: 7, address: '3984 Jackson', tenant: 'Seneca Young', phone: '', rent: '1000', dueDate: '1st', isBehind: false },
+        { id: 8, address: '18576 Henry', tenant: 'Tierra Lynn Pinson', phone: '', rent: '1200', dueDate: '1st', isBehind: false },
+        { id: 9, address: '24096 Pennie', tenant: 'Matthew Demetro', phone: '', rent: '1000', dueDate: '1st', isBehind: false },
+        { id: 10, address: '1055 Mayflower', tenant: 'Tyler Lamb', phone: '', rent: '1200', dueDate: '1st', isBehind: false },
+        { id: 11, address: '2380 Bloomfield', tenant: 'Debra Clark', phone: '', rent: '1000', dueDate: '1st', isBehind: false },
+        { id: 12, address: '14670 McGuire', tenant: 'Carrissa Clark', phone: '', rent: '1200', dueDate: '1st', isBehind: false },
+        { id: 13, address: '17663 Clarann', tenant: 'Justin Chall', phone: '', rent: '1200', dueDate: '1st', isBehind: false }
     ];
 
     const form = document.getElementById('propertyForm');
@@ -261,30 +288,36 @@
     const formTitle = document.getElementById('formTitle');
     const submitBtn = document.getElementById('submitBtn');
 
+    window.sendSms = function(phone, message) {
+        if (!phone || phone.trim() === '') {
+            alert('Please click the "Edit" button to add a phone number for this tenant before sending a message.');
+            return;
+        }
+        const cleanPhone = phone.replace(/\D/g, '');
+        window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+    };
+
     function renderTable() {
         tableBody.innerHTML = '';
         properties.forEach(prop => {
             const statusClass = prop.isBehind ? 'status-behind' : 'status-current';
             const statusText = prop.isBehind ? 'Behind' : 'Current';
-            const cleanPhone = prop.phone.replace(/\D/g, '');
-
+            
             const msgThankYou = `Hi ${prop.tenant}, just confirming I received the $${prop.rent} rent for this month. Thank you!`;
             const msgReminder = `Hello ${prop.tenant}, I haven't received the $${prop.rent} rent for this month yet. Please let me know when you plan to send it.`;
+
+            const phoneDisplay = prop.phone ? prop.phone : '<span style="color:#94a3b8; font-style:italic;">No phone added</span>';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${prop.address}</td>
-                <td><strong>${prop.tenant}</strong><br><small>${prop.phone}</small></td>
+                <td><strong>${prop.tenant}</strong><br><small>${phoneDisplay}</small></td>
                 <td>$${prop.rent}</td>
                 <td>${prop.dueDate}</td>
                 <td class="${statusClass}">${statusText}</td>
                 <td class="action-buttons">
-                    <a href="sms:${cleanPhone}?body=${encodeURIComponent(msgThankYou)}" style="text-decoration: none;">
-                        <button class="btn-success">Send Thank You</button>
-                    </a>
-                    <a href="sms:${cleanPhone}?body=${encodeURIComponent(msgReminder)}" style="text-decoration: none;">
-                        <button class="btn-danger">Send Reminder</button>
-                    </a>
+                    <button class="btn-success" onclick="sendSms('${prop.phone}', '${msgThankYou}')">Send Thank You</button>
+                    <button class="btn-danger" onclick="sendSms('${prop.phone}', '${msgReminder}')">Send Reminder</button>
                 </td>
                 <td class="action-buttons">
                     <button class="btn-edit" onclick="editProperty(${prop.id})">Edit</button>
@@ -311,7 +344,7 @@
 
         if (id) {
             properties = properties.map(p => p.id === newProperty.id ? newProperty : p);
-            formTitle.textContent = "Add New Property & Tenant";
+            formTitle.textContent = "Add / Edit Property";
             submitBtn.textContent = "Save Property";
         } else {
             properties.push(newProperty);
@@ -335,7 +368,7 @@
             
             formTitle.textContent = "Edit Property";
             submitBtn.textContent = "Update Property";
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
