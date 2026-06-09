@@ -7,63 +7,50 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --success: #10b981;
-            --success-hover: #059669;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --bg: #f3f4f6;
-            --card: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --radius: 12px;
+            --primary: #4f46e5; --primary-hover: #4338ca;
+            --success: #10b981; --success-hover: #059669;
+            --danger: #ef4444; --danger-hover: #dc2626;
+            --bg: #f3f4f6; --card: #ffffff;
+            --text-main: #111827; --text-muted: #6b7280;
+            --border: #e5e7eb; --radius: 12px;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.5;
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.5; }
         .container { max-width: 1100px; margin: 0 auto; }
-
-        h1, h2 { font-weight: 700; color: var(--text-main); }
+        h1, h2, h3 { font-weight: 700; color: var(--text-main); }
         h1 { margin-bottom: 0; background: linear-gradient(135deg, var(--primary), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
         .header-actions { display: flex; gap: 10px; }
 
-        .card {
-            background: var(--card); border-radius: var(--radius); padding: 25px;
-            box-shadow: var(--shadow); margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1);
-        }
+        .card { background: var(--card); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Financial Dashboard Styles */
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .dash-box { padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; }
+        .dash-assets { background: #e0e7ff; border: 1px solid #c7d2fe; }
+        .dash-cash { background: #ecfdf5; border: 1px solid #a7f3d0; }
+        .dash-value { font-size: 2.2rem; font-weight: 800; margin: 5px 0 0 0; letter-spacing: -0.5px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .stat-item { background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; }
+        .stat-label { color: var(--text-muted); font-weight: 600; margin-bottom: 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;}
+        .stat-num { font-weight: 700; color: var(--text-main); font-size: 1.1rem; }
 
         #loginView { max-width: 400px; margin: 10vh auto; padding: 40px 30px; }
-        
         .alert-box { text-align: center; margin-bottom: 15px; font-size: 0.9em; font-weight: 500; display: none; padding: 10px; border-radius: 8px; }
         .alert-danger { color: var(--danger); background: #fef2f2; }
         .alert-success { color: var(--success); background: #ecfdf5; }
 
         .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
         label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-main); }
-
-        input[type="text"], input[type="password"], input[type="tel"], input[type="number"], select {
-            width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: 'Inter', sans-serif; font-size: 0.95rem; transition: all 0.2s ease; background-color: #f9fafb;
-        }
+        input[type="text"], input[type="password"], input[type="tel"], input[type="number"], select { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: 'Inter', sans-serif; font-size: 0.95rem; transition: all 0.2s ease; background-color: #f9fafb; }
         input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); background-color: #fff; }
 
         .checkbox-group { display: flex; align-items: center; gap: 10px; background: #f9fafb; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border); }
         .checkbox-group label { margin: 0; cursor: pointer; }
 
-        button {
-            padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 0.95rem; color: white; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        button { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 0.95rem; color: white; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         button:active { transform: translateY(0); }
         button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
@@ -92,11 +79,7 @@
         .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
         .hidden { display: none !important; }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px); z-index: 1000;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
         .modal-card { width: 100%; max-width: 450px; margin: 20px; }
 
         @media screen and (max-width: 768px) {
@@ -141,6 +124,30 @@
         <div class="header-actions">
             <button class="btn-edit" onclick="openPasswordModal()">Change Password</button>
             <button class="btn-danger" onclick="logout()">Log Out</button>
+        </div>
+    </div>
+
+    <div class="card" id="financialDashboard">
+        <h2 style="margin-top:0; margin-bottom: 20px;">Financial Overview</h2>
+        
+        <div class="dash-grid">
+            <div class="dash-box dash-assets">
+                <h3 style="margin: 0; color: #3730a3; font-size: 1.1rem;">Total Net Worth (Assets)</h3>
+                <p class="dash-value" style="color: #312e81;" id="nwAssetsDisplay">$0</p>
+            </div>
+            <div class="dash-box dash-cash">
+                <h3 style="margin: 0; color: #065f46; font-size: 1.1rem;">Liquid Net Worth (Cash)</h3>
+                <p class="dash-value" style="color: #064e3b;" id="nwCashDisplay">$0</p>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-item"><div class="stat-label">Personal (C)</div><div class="stat-num" id="valC">$0</div></div>
+            <div class="stat-item"><div class="stat-label">Business (M)</div><div class="stat-num" id="valM">$0</div></div>
+            <div class="stat-item"><div class="stat-label">Crypto (CR)</div><div class="stat-num" id="valCR">$0</div></div>
+            <div class="stat-item"><div class="stat-label">Stocks (CS)</div><div class="stat-num" id="valCS">$0</div></div>
+            <div class="stat-item" style="border-color: #fecaca; background: #fef2f2;"><div class="stat-label" style="color: var(--danger);">Mama</div><div class="stat-num" style="color: var(--danger);" id="valMama">$0</div></div>
+            <div class="stat-item" style="border-color: #fecaca; background: #fef2f2;"><div class="stat-label" style="color: var(--danger);">Baba</div><div class="stat-num" style="color: var(--danger);" id="valBaba">$0</div></div>
         </div>
     </div>
 
@@ -208,18 +215,9 @@
         
         <form id="changePwdForm">
             <div class="form-group" style="grid-template-columns: 1fr; gap: 15px;">
-                <div>
-                    <label>Current Password</label>
-                    <input type="password" id="currentPwd" required>
-                </div>
-                <div>
-                    <label>New Password</label>
-                    <input type="password" id="newPwd" required>
-                </div>
-                <div>
-                    <label>Confirm New Password</label>
-                    <input type="password" id="confirmPwd" required>
-                </div>
+                <div><label>Current Password</label><input type="password" id="currentPwd" required></div>
+                <div><label>New Password</label><input type="password" id="newPwd" required></div>
+                <div><label>Confirm New Password</label><input type="password" id="confirmPwd" required></div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button type="button" class="btn-edit" style="flex: 1;" onclick="closePasswordModal()">Cancel</button>
@@ -230,26 +228,24 @@
 </div>
 
 <script>
-    // --- UPDATED API URL ---
+    // --- API URL ---
     const API_URL = "https://script.google.com/macros/s/AKfycbywjXwTtKfFZycp2nxoGNNoFGLp_NdQ-9wVC2k4j7NpX9xeb3BSXesYCP-e3cbV1fO5tA/exec";
     let properties = [];
     let currentUser = null;
 
-    // --- ENCRYPTION FUNCTIONS ---
-    function encryptPassword(str) {
-        let hash = [];
-        for(let i=0; i<str.length; i++) hash.push(str.charCodeAt(i) + 5);
-        return hash;
-    }
+    function encryptPassword(str) { let hash = []; for(let i=0; i<str.length; i++) hash.push(str.charCodeAt(i) + 5); return hash; }
     function verifyPassword(inputStr, savedHash) {
         if(inputStr.length !== savedHash.length) return false;
-        for(let i=0; i<inputStr.length; i++) {
-            if(inputStr.charCodeAt(i) + 5 !== savedHash[i]) return false;
-        }
+        for(let i=0; i<inputStr.length; i++) if(inputStr.charCodeAt(i) + 5 !== savedHash[i]) return false;
         return true;
     }
 
-    // --- POPULATE DATES ---
+    const formatCurrency = (num) => {
+        const val = parseFloat(num);
+        if(isNaN(val)) return '$0';
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+    };
+
     const dueDateSelect = document.getElementById('dueDate');
     for(let i = 1; i <= 31; i++) {
         let option = document.createElement('option');
@@ -261,7 +257,6 @@
         dueDateSelect.appendChild(option);
     }
 
-    // --- AUTHENTICATION ---
     const loginForm = document.getElementById('loginForm');
     const loginView = document.getElementById('loginView');
     const appView = document.getElementById('appView');
@@ -296,13 +291,8 @@
         }
     });
 
-    function logout() {
-        currentUser = null;
-        appView.classList.add('hidden');
-        loginView.classList.remove('hidden');
-    }
+    function logout() { currentUser = null; appView.classList.add('hidden'); loginView.classList.remove('hidden'); }
 
-    // --- CHANGE PASSWORD ---
     const passwordModal = document.getElementById('passwordModal');
     const changePwdForm = document.getElementById('changePwdForm');
     const pwdError = document.getElementById('pwdError');
@@ -318,50 +308,58 @@
         const confirmPwd = document.getElementById('confirmPwd').value;
         const activeHash = JSON.parse(localStorage.getItem(`pwd_${currentUser}`)) || (currentUser === 'maher' ? [115, 116] : [126, 106, 120]);
 
-        if (!verifyPassword(currentPwd, activeHash)) {
-            pwdError.textContent = "Current password is incorrect."; pwdError.style.display = 'block'; pwdSuccess.style.display = 'none'; return;
-        }
-        if (newPwd !== confirmPwd) {
-            pwdError.textContent = "New passwords do not match."; pwdError.style.display = 'block'; pwdSuccess.style.display = 'none'; return;
-        }
+        if (!verifyPassword(currentPwd, activeHash)) { pwdError.textContent = "Current password is incorrect."; pwdError.style.display = 'block'; pwdSuccess.style.display = 'none'; return; }
+        if (newPwd !== confirmPwd) { pwdError.textContent = "New passwords do not match."; pwdError.style.display = 'block'; pwdSuccess.style.display = 'none'; return; }
 
         localStorage.setItem(`pwd_${currentUser}`, JSON.stringify(encryptPassword(newPwd)));
         pwdError.style.display = 'none'; pwdSuccess.textContent = "Password updated successfully!"; pwdSuccess.style.display = 'block';
         changePwdForm.reset(); setTimeout(closePasswordModal, 1500);
     });
 
-    // --- GOOGLE SHEETS API INTEGRATION ---
     const tableBody = document.getElementById('tableBody');
     const form = document.getElementById('propertyForm');
     const formTitle = document.getElementById('formTitle');
     const submitBtn = document.getElementById('submitBtn');
 
+    function updateFinancialDashboard(financials) {
+        document.getElementById('nwAssetsDisplay').textContent = formatCurrency(financials['NW Assets']);
+        document.getElementById('nwCashDisplay').textContent = formatCurrency(financials['NW Cash']);
+        document.getElementById('valC').textContent = formatCurrency(financials['C']);
+        document.getElementById('valM').textContent = formatCurrency(financials['M']);
+        document.getElementById('valCR').textContent = formatCurrency(financials['CR']);
+        document.getElementById('valCS').textContent = formatCurrency(financials['CS']);
+        document.getElementById('valMama').textContent = formatCurrency(financials['Mama']);
+        document.getElementById('valBaba').textContent = formatCurrency(financials['Baba']);
+    }
+
     async function loadProperties() {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">Syncing with Google Sheets...</td></tr>';
         try {
             const response = await fetch(API_URL);
-            properties = await response.json();
+            const data = await response.json();
             
-            if(!Array.isArray(properties)) properties = [];
+            properties = data.properties || [];
+            if(data.financials) updateFinancialDashboard(data.financials);
             
             renderTable();
         } catch (error) {
             console.error("Error fetching data:", error);
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--danger);">Failed to load data. Please check your API URL and Apps Script deployment.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--danger);">Failed to load data. Please check your API URL.</td></tr>';
         }
     }
 
     async function processPropertyAction(actionType, propertyData) {
         try {
-            // Stripped out extra headers to ensure a clean request that bypasses Google's CORS preflight blocks
             await fetch(API_URL, {
                 method: 'POST',
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                redirect: "follow",
                 body: JSON.stringify({ action: actionType, data: propertyData })
             });
             await loadProperties(); 
         } catch (error) {
             console.error(`Error during ${actionType}:`, error);
-            alert("Failed to sync with Google Sheets. Please check your internet connection and try again.");
+            alert("Failed to sync with Google Sheets. Please check your internet connection.");
         }
     }
 
@@ -373,26 +371,32 @@
         }
 
         properties.forEach(prop => {
-            const isBehind = (prop.isBehind === true || prop.isBehind === 'true' || prop.isBehind === 'TRUE');
+            const id = prop.id || Date.now();
+            const address = prop.address || 'No Address';
+            const tenant = prop.tenant || 'No Tenant';
+            const rent = prop.rent || '0';
+            const phone = prop.phone || '';
+            const dueDate = prop.dueDate || '1st';
+            const isBehind = (prop.isBehind === true || prop.isBehind === 'true');
             
             const statusClass = isBehind ? 'badge-behind' : 'badge-current';
             const statusText = isBehind ? 'Behind' : 'Current';
-            const phoneDisplay = prop.phone ? prop.phone : '<span style="color:var(--danger); font-style:italic;">No phone added</span>';
+            const phoneDisplay = phone ? phone : '<span style="color:var(--danger); font-style:italic;">No phone added</span>';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td data-label="Address"><strong>${prop.address}</strong></td>
-                <td data-label="Tenant Details"><div class="tenant-name">${prop.tenant}</div><div class="tenant-phone">${phoneDisplay}</div></td>
-                <td data-label="Rent" style="font-weight: 600;">$${prop.rent}</td>
-                <td data-label="Due Date">${prop.dueDate}</td>
+                <td data-label="Address"><strong>${address}</strong></td>
+                <td data-label="Tenant Details"><div class="tenant-name">${tenant}</div><div class="tenant-phone">${phoneDisplay}</div></td>
+                <td data-label="Rent" style="font-weight: 600;">$${rent}</td>
+                <td data-label="Due Date">${dueDate}</td>
                 <td data-label="Status"><span class="badge ${statusClass}">${statusText}</span></td>
                 <td data-label="Messaging" class="action-buttons">
-                    <button class="btn-success" onclick="sendSms('${prop.phone}', 'thankyou')">Rent Received</button>
-                    <button class="btn-danger" onclick="sendSms('${prop.phone}', 'reminder')">Send Reminder</button>
+                    <button class="btn-success" onclick="sendSms('${phone}', 'thankyou')">Rent Received</button>
+                    <button class="btn-danger" onclick="sendSms('${phone}', 'reminder')">Send Reminder</button>
                 </td>
                 <td data-label="Manage" class="action-buttons">
-                    <button class="btn-edit" onclick="editProperty(${prop.id})">Edit</button>
-                    <button class="btn-edit" style="color: var(--danger); border-color: #fecaca;" onclick="deleteProperty(${prop.id})">Delete</button>
+                    <button class="btn-edit" onclick="editProperty('${id}')">Edit</button>
+                    <button class="btn-edit" style="color: var(--danger); border-color: #fecaca;" onclick="deleteProperty('${id}')">Delete</button>
                 </td>
             `;
             tableBody.appendChild(tr);
@@ -401,7 +405,6 @@
 
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
         submitBtn.textContent = "Saving to Google Sheets...";
         submitBtn.disabled = true;
 
@@ -409,7 +412,7 @@
         const actionType = id ? 'UPDATE' : 'ADD';
         
         const propertyData = {
-            id: id ? parseInt(id) : Date.now(),
+            id: id ? id : Date.now(),
             address: document.getElementById('address').value,
             tenant: document.getElementById('tenant').value,
             rent: document.getElementById('rent').value,
@@ -428,15 +431,25 @@
     });
 
     window.editProperty = function(id) {
-        const prop = properties.find(p => p.id == id); 
+        const prop = properties.find(p => String(p.id) === String(id)); 
         if (prop) {
             document.getElementById('editId').value = prop.id;
-            document.getElementById('address').value = prop.address;
-            document.getElementById('tenant').value = prop.tenant;
-            document.getElementById('rent').value = prop.rent;
+            document.getElementById('address').value = prop.address || '';
+            document.getElementById('tenant').value = prop.tenant || '';
+            document.getElementById('rent').value = prop.rent || '';
             document.getElementById('phone').value = prop.phone || '';
-            document.getElementById('dueDate').value = prop.dueDate;
-            document.getElementById('isBehind').checked = (prop.isBehind === true || prop.isBehind === 'true' || prop.isBehind === 'TRUE');
+            
+            const sheetDate = prop.dueDate || '1st';
+            const dateSelect = document.getElementById('dueDate');
+            let found = Array.from(dateSelect.options).some(opt => opt.value === sheetDate);
+            if (!found) {
+                let newOpt = document.createElement('option');
+                newOpt.value = sheetDate; newOpt.textContent = sheetDate;
+                dateSelect.appendChild(newOpt);
+            }
+            dateSelect.value = sheetDate;
+            
+            document.getElementById('isBehind').checked = (prop.isBehind === true || prop.isBehind === 'true');
             
             formTitle.textContent = "Edit Property";
             submitBtn.textContent = "Update Property";
@@ -446,20 +459,19 @@
 
     window.deleteProperty = async function(id) {
         if (confirm('Are you sure you want to delete this property? This will remove it from Google Sheets.')) {
-            properties = properties.filter(p => p.id != id);
+            properties = properties.filter(p => String(p.id) !== String(id));
             renderTable(); 
-            
             await processPropertyAction('DELETE', { id: id });
         }
     };
 
     window.sendSms = function(phone, msgType) {
-        if (!phone || phone.trim() === '' || phone === 'undefined') {
+        if (!phone || String(phone).trim() === '' || String(phone) === 'undefined' || String(phone) === 'null') {
             alert('Please click the "Edit" button to add a phone number for this tenant before sending a message.');
             return;
         }
         let messageText = msgType === 'thankyou' ? "Rent received, thank you" : "Hey, when can I expect this month's rent?";
-        const cleanPhone = phone.toString().replace(/\D/g, '');
+        const cleanPhone = String(phone).replace(/\D/g, '');
         window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(messageText)}`;
     };
 </script>
