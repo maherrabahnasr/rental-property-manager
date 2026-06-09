@@ -330,7 +330,7 @@
         changePwdForm.reset(); setTimeout(closePasswordModal, 1500);
     });
 
-    // --- GOOGLE SHEETS API INTEGRATION ---
+    // --- GOOGLE SHEETS API INTEGRATION (ANTI-CORS) ---
     const tableBody = document.getElementById('tableBody');
     const form = document.getElementById('propertyForm');
     const formTitle = document.getElementById('formTitle');
@@ -356,12 +356,17 @@
         try {
             await fetch(API_URL, {
                 method: 'POST',
+                headers: {
+                    // This prevents strict browser CORS preflight checks
+                    "Content-Type": "text/plain;charset=utf-8",
+                },
+                redirect: "follow", // Forces the browser to follow Google's internal routing
                 body: JSON.stringify({ action: actionType, data: propertyData })
             });
             await loadProperties(); // Refresh the table after saving
         } catch (error) {
             console.error(`Error during ${actionType}:`, error);
-            alert("Failed to sync with Google Sheets. Please try again.");
+            alert("Failed to sync with Google Sheets. Please check your internet connection and try again.");
         }
     }
 
@@ -448,7 +453,6 @@
     window.deleteProperty = async function(id) {
         if (confirm('Are you sure you want to delete this property? This will remove it from Google Sheets.')) {
             // Provide immediate visual feedback
-            const propRow = properties.find(p => p.id == id);
             properties = properties.filter(p => p.id != id);
             renderTable(); 
             
