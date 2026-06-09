@@ -230,7 +230,7 @@
 </div>
 
 <script>
-    // --- API URL UPDATED HERE ---
+    // --- UPDATED API URL ---
     const API_URL = "https://script.google.com/macros/s/AKfycbywjXwTtKfFZycp2nxoGNNoFGLp_NdQ-9wVC2k4j7NpX9xeb3BSXesYCP-e3cbV1fO5tA/exec";
     let properties = [];
     let currentUser = null;
@@ -290,7 +290,7 @@
             appView.classList.remove('hidden');
             loginForm.reset();
             loginError.style.display = 'none';
-            loadProperties(); // FETCH FROM GOOGLE SHEETS
+            loadProperties(); 
         } else {
             loginError.style.display = 'block';
         }
@@ -330,7 +330,7 @@
         changePwdForm.reset(); setTimeout(closePasswordModal, 1500);
     });
 
-    // --- GOOGLE SHEETS API INTEGRATION (ANTI-CORS) ---
+    // --- GOOGLE SHEETS API INTEGRATION ---
     const tableBody = document.getElementById('tableBody');
     const form = document.getElementById('propertyForm');
     const formTitle = document.getElementById('formTitle');
@@ -342,7 +342,6 @@
             const response = await fetch(API_URL);
             properties = await response.json();
             
-            // Handle edge case where sheet might be empty
             if(!Array.isArray(properties)) properties = [];
             
             renderTable();
@@ -354,16 +353,12 @@
 
     async function processPropertyAction(actionType, propertyData) {
         try {
+            // Stripped out extra headers to ensure a clean request that bypasses Google's CORS preflight blocks
             await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    // This prevents strict browser CORS preflight checks
-                    "Content-Type": "text/plain;charset=utf-8",
-                },
-                redirect: "follow", // Forces the browser to follow Google's internal routing
                 body: JSON.stringify({ action: actionType, data: propertyData })
             });
-            await loadProperties(); // Refresh the table after saving
+            await loadProperties(); 
         } catch (error) {
             console.error(`Error during ${actionType}:`, error);
             alert("Failed to sync with Google Sheets. Please check your internet connection and try again.");
@@ -378,7 +373,6 @@
         }
 
         properties.forEach(prop => {
-            // Convert string "true"/"false" from Google Sheets to actual booleans
             const isBehind = (prop.isBehind === true || prop.isBehind === 'true' || prop.isBehind === 'TRUE');
             
             const statusClass = isBehind ? 'badge-behind' : 'badge-current';
@@ -434,7 +428,7 @@
     });
 
     window.editProperty = function(id) {
-        const prop = properties.find(p => p.id == id); // Loose equality in case sheet returns string
+        const prop = properties.find(p => p.id == id); 
         if (prop) {
             document.getElementById('editId').value = prop.id;
             document.getElementById('address').value = prop.address;
@@ -452,11 +446,9 @@
 
     window.deleteProperty = async function(id) {
         if (confirm('Are you sure you want to delete this property? This will remove it from Google Sheets.')) {
-            // Provide immediate visual feedback
             properties = properties.filter(p => p.id != id);
             renderTable(); 
             
-            // Delete from database
             await processPropertyAction('DELETE', { id: id });
         }
     };
