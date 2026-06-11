@@ -54,8 +54,16 @@
         .badge-behind { background-color: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
         .badge-current { background-color: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
 
-        .filter-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .filter-select { width: auto; padding: 8px 15px; font-weight: 600; color: var(--primary); border-color: var(--primary); cursor: pointer; }
+        /* Interactive Filter Cards */
+        .filter-cards { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .filter-card { flex: 1; min-width: 120px; background: #f9fafb; border: 2px solid var(--border); border-radius: var(--radius); padding: 15px; cursor: pointer; text-align: center; transition: all 0.2s ease; }
+        .filter-card:hover { border-color: #c7d2fe; background: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .filter-card.active { border-color: var(--primary); background: #eef2ff; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15); transform: translateY(-2px); }
+        .filter-title { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .filter-card.active .filter-title { color: var(--primary); }
+        .filter-count { font-size: 1.8rem; font-weight: 800; color: var(--text-main); }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
 
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th, td { text-align: left; padding: 16px; border-bottom: 1px solid var(--border); }
@@ -120,14 +128,23 @@
     </div>
 
     <div class="card">
-        <div class="filter-container">
-            <h2 style="margin:0;">Property Dashboard</h2>
-            <select id="statusFilter" class="filter-select" onchange="renderTable()">
-                <option value="all">View All Properties</option>
-                <option value="behind">View Behind Only</option>
-                <option value="current">View Current Only</option>
-            </select>
+        <h2 style="margin-top:0; margin-bottom: 20px;">Property Dashboard</h2>
+        
+        <div class="filter-cards">
+            <div class="filter-card active" id="filter-all" onclick="setFilter('all')">
+                <div class="filter-title">All Properties</div>
+                <div class="filter-count" id="count-all">0</div>
+            </div>
+            <div class="filter-card" id="filter-current" onclick="setFilter('current')">
+                <div class="filter-title">Current</div>
+                <div class="filter-count text-success" id="count-current">0</div>
+            </div>
+            <div class="filter-card" id="filter-behind" onclick="setFilter('behind')">
+                <div class="filter-title">Behind</div>
+                <div class="filter-count text-danger" id="count-behind">0</div>
+            </div>
         </div>
+
         <table id="propertyTable">
             <thead>
                 <tr>
@@ -189,6 +206,7 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbywjXwTtKfFZycp2nxoGNNoFGLp_NdQ-9wVC2k4j7NpX9xeb3BSXesYCP-e3cbV1fO5tA/exec";
     let properties = [];
     let currentUser = null;
+    let currentFilter = 'all';
 
     function encryptPassword(str) { let hash = []; for(let i=0; i<str.length; i++) hash.push(str.charCodeAt(i) + 5); return hash; }
     function verifyPassword(inputStr, savedHash) {
@@ -268,6 +286,17 @@
     
     function closePropertyModal() {
         document.getElementById('propertyModal').classList.add('hidden');
+    }
+
+    // --- State & Filters ---
+    function setFilter(filterType) {
+        currentFilter = filterType;
+        
+        // Update UI styling for active card
+        document.querySelectorAll('.filter-card').forEach(card => card.classList.remove('active'));
+        document.getElementById('filter-' + filterType).classList.add('active');
+        
+        renderTable();
     }
 
     // --- Google Sheets Sync ---
@@ -362,28 +391,44 @@
 
     function renderTable() {
         tableBody.innerHTML = '';
-        
-        // Apply the filter
-        const filterVal = document.getElementById('statusFilter').value;
         const today = new Date().getDate();
         
-        const filteredProperties = properties.filter(prop => {
+        // 1. Calculate Statuses & Counts
+        let countAll = properties.length;
+        let countBehind = 0;
+        let countCurrent = 0;
+
+        properties.forEach(prop => {
             const rent = parseFloat(prop.rent) || 0;
             const dueDateStr = prop.dueDate || '1st';
             const paidThisMonth = parseFloat(prop.paidThisMonth) || 0;
             const dueDayNum = parseInt(dueDateStr) || 1; 
-            const isBehind = (paidThisMonth < rent) && (today > dueDayNum);
             
-            if (filterVal === 'behind') return isBehind;
-            if (filterVal === 'current') return !isBehind;
+            // Calculate if behind
+            prop._isBehind = (paidThisMonth < rent) && (today > dueDayNum);
+
+            if (prop._isBehind) countBehind++;
+            else countCurrent++;
+        });
+
+        // Update Dashboard Cards
+        document.getElementById('count-all').textContent = countAll;
+        document.getElementById('count-current').textContent = countCurrent;
+        document.getElementById('count-behind').textContent = countBehind;
+
+        // 2. Filter Properties for Display
+        const filteredProperties = properties.filter(prop => {
+            if (currentFilter === 'behind') return prop._isBehind;
+            if (currentFilter === 'current') return !prop._isBehind;
             return true; // 'all'
         });
 
         if(filteredProperties.length === 0) { 
-            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">No properties found matching this filter.</td></tr>`; 
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--text-muted);">No properties match this view.</td></tr>`; 
             return; 
         }
 
+        // 3. Render Rows
         filteredProperties.forEach(prop => {
             const id = prop.id || Date.now();
             const address = prop.address || 'No Address';
@@ -392,9 +437,7 @@
             const phone = prop.phone || '';
             const dueDateStr = prop.dueDate || '1st';
             const paidThisMonth = parseFloat(prop.paidThisMonth) || 0;
-            
-            const dueDayNum = parseInt(dueDateStr) || 1; 
-            const isBehind = (paidThisMonth < rent) && (today > dueDayNum);
+            const isBehind = prop._isBehind;
 
             const statusClass = isBehind ? 'badge-behind' : 'badge-current';
             const statusText = isBehind ? 'Behind' : 'Current';
