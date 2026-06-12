@@ -54,7 +54,6 @@
         .badge-behind { background-color: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
         .badge-current { background-color: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
 
-        /* Interactive Filter Cards */
         .filter-cards { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
         .filter-card { flex: 1; min-width: 120px; background: #f9fafb; border: 2px solid var(--border); border-radius: var(--radius); padding: 15px; cursor: pointer; text-align: center; transition: all 0.2s ease; }
         .filter-card:hover { border-color: #c7d2fe; background: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
@@ -129,7 +128,6 @@
 
     <div class="card">
         <h2 style="margin-top:0; margin-bottom: 20px;">Property Dashboard</h2>
-        
         <div class="filter-cards">
             <div class="filter-card active" id="filter-all" onclick="setFilter('all')">
                 <div class="filter-title">All Properties</div>
@@ -226,7 +224,6 @@
         dueDateSelect.appendChild(option);
     }
 
-    // --- Authentication ---
     const loginForm = document.getElementById('loginForm');
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -256,7 +253,6 @@
 
     function logout() { currentUser = null; document.getElementById('appView').classList.add('hidden'); document.getElementById('loginView').classList.remove('hidden'); }
 
-    // --- Password Modals ---
     function openPasswordModal() { document.getElementById('passwordModal').classList.remove('hidden'); document.getElementById('changePwdForm').reset(); document.getElementById('pwdError').style.display = 'none'; document.getElementById('pwdSuccess').style.display = 'none'; }
     function closePasswordModal() { document.getElementById('passwordModal').classList.add('hidden'); }
 
@@ -275,7 +271,6 @@
         this.reset(); setTimeout(closePasswordModal, 1500);
     });
 
-    // --- Add/Edit Property Modals ---
     function openPropertyModal() {
         document.getElementById('propertyModal').classList.remove('hidden');
         document.getElementById('propertyForm').reset();
@@ -288,18 +283,13 @@
         document.getElementById('propertyModal').classList.add('hidden');
     }
 
-    // --- State & Filters ---
     function setFilter(filterType) {
         currentFilter = filterType;
-        
-        // Update UI styling for active card
         document.querySelectorAll('.filter-card').forEach(card => card.classList.remove('active'));
         document.getElementById('filter-' + filterType).classList.add('active');
-        
         renderTable();
     }
 
-    // --- Google Sheets Sync ---
     const tableBody = document.getElementById('tableBody');
     const form = document.getElementById('propertyForm');
     const submitBtn = document.getElementById('submitBtn');
@@ -332,8 +322,7 @@
         }
     }
 
-    // --- Record Payment Logic ---
-    window.recordPayment = async function(id, phone, rent, paidSoFar, tenant) {
+    window.recordPayment = async function(id, phone) {
         const inputEl = document.getElementById('pay_' + id);
         const amount = parseFloat(inputEl.value);
         
@@ -348,28 +337,24 @@
         btn.disabled = true;
 
         try {
-            await fetch(API_URL, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 redirect: "follow",
-                body: JSON.stringify({ action: 'RECORD_PAYMENT', data: { id: id, amount: amount }, user: currentUser })
+                body: JSON.stringify({ 
+                    action: 'RECORD_PAYMENT', 
+                    data: { id: id, amount: amount, rent: properties.find(p => p.id == id).rent }, 
+                    user: currentUser 
+                })
             });
 
-            const totalPaidNow = paidSoFar + amount;
-            const remaining = rent - totalPaidNow;
-            let msg = "";
-
-            if (remaining <= 0) {
-                msg = `Hi ${tenant}, I received your payment of $${amount}. Your rent for this month is now fully paid. Thank you!`;
-            } else {
-                msg = `Hi ${tenant}, I received your payment of $${amount}. You currently have a remaining balance of $${remaining} for this month. Please let me know when you plan to send the rest.`;
-            }
-
+            const responseData = await response.json();
+            
             if (phone && String(phone).trim() !== '' && String(phone) !== 'undefined') {
                 const cleanPhone = String(phone).replace(/\D/g, ''); 
-                window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(msg)}`;
+                window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(responseData.textMessage)}`;
             } else {
-                alert('Payment saved! (No phone number saved to send an automated text)');
+                alert('Payment saved!\n\nAuto-Message Generated:\n' + responseData.textMessage);
             }
 
             await loadProperties();
@@ -393,7 +378,6 @@
         tableBody.innerHTML = '';
         const today = new Date().getDate();
         
-        // 1. Calculate Statuses & Counts
         let countAll = properties.length;
         let countBehind = 0;
         let countCurrent = 0;
@@ -402,25 +386,24 @@
             const rent = parseFloat(prop.rent) || 0;
             const dueDateStr = prop.dueDate || '1st';
             const paidThisMonth = parseFloat(prop.paidThisMonth) || 0;
+            const pastDue = parseFloat(prop.pastDue) || 0;
             const dueDayNum = parseInt(dueDateStr) || 1; 
             
-            // Calculate if behind
-            prop._isBehind = (paidThisMonth < rent) && (today > dueDayNum);
+            // Mark as behind if they owe old rent OR if it is past due date for current month
+            prop._isBehind = (pastDue > 0) || ((paidThisMonth < rent) && (today > dueDayNum));
 
             if (prop._isBehind) countBehind++;
             else countCurrent++;
         });
 
-        // Update Dashboard Cards
         document.getElementById('count-all').textContent = countAll;
         document.getElementById('count-current').textContent = countCurrent;
         document.getElementById('count-behind').textContent = countBehind;
 
-        // 2. Filter Properties for Display
         const filteredProperties = properties.filter(prop => {
             if (currentFilter === 'behind') return prop._isBehind;
             if (currentFilter === 'current') return !prop._isBehind;
-            return true; // 'all'
+            return true;
         });
 
         if(filteredProperties.length === 0) { 
@@ -428,7 +411,6 @@
             return; 
         }
 
-        // 3. Render Rows
         filteredProperties.forEach(prop => {
             const id = prop.id || Date.now();
             const address = prop.address || 'No Address';
@@ -437,11 +419,14 @@
             const phone = prop.phone || '';
             const dueDateStr = prop.dueDate || '1st';
             const paidThisMonth = parseFloat(prop.paidThisMonth) || 0;
+            const pastDue = parseFloat(prop.pastDue) || 0;
             const isBehind = prop._isBehind;
 
             const statusClass = isBehind ? 'badge-behind' : 'badge-current';
             const statusText = isBehind ? 'Behind' : 'Current';
             const phoneDisplay = phone ? phone : '<span style="color:var(--danger); font-style:italic;">No phone</span>';
+            
+            const pastDueMarkup = pastDue > 0 ? `<div style="font-size: 0.85rem; color: var(--danger); font-weight: 700; margin-top:4px;">Past Due: $${pastDue}</div>` : '';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -456,12 +441,13 @@
                 <td data-label="Financials">
                     <div style="font-weight: 600;">Rent: $${rent}</div>
                     <div style="font-size: 0.85rem; color: var(--success); font-weight: 600;">Paid This Month: $${paidThisMonth}</div>
+                    ${pastDueMarkup}
                     <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:4px;">Due: ${dueDateStr}</div>
                 </td>
                 <td data-label="Status"><span class="badge ${statusClass}">${statusText}</span></td>
                 <td data-label="Messaging" class="action-buttons">
                     <input type="number" id="pay_${id}" class="payment-input" placeholder="$ Amt">
-                    <button class="btn-success" onclick="recordPayment('${id}', '${phone}', ${rent}, ${paidThisMonth}, '${tenant.replace(/'/g, "\\'")}')">Received</button>
+                    <button class="btn-success" onclick="recordPayment('${id}', '${phone}')">Received</button>
                     <button class="btn-danger" onclick="sendReminder('${phone}')">Reminder</button>
                 </td>
             `;
@@ -471,7 +457,7 @@
 
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        submitBtn.textContent = "Saving to Google Sheets..."; submitBtn.disabled = true;
+        submitBtn.textContent = "Saving..."; submitBtn.disabled = true;
 
         const id = document.getElementById('editId').value;
         const actionType = id ? 'UPDATE' : 'ADD';
