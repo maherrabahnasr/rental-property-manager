@@ -153,8 +153,7 @@
                     <th>Messaging & Payments</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
 </div>
@@ -299,22 +298,40 @@
         try {
             const response = await fetch(API_URL + "?user=" + currentUser);
             const data = await response.json();
+
+            // Error Catching Display
+            if (data.error) {
+                console.error("Backend Error:", data.error);
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--danger); font-weight: bold; line-height: 1.6;">
+                    ⚠️ Google Apps Script Crash:<br><br><span style="color: var(--text-main); font-weight: normal;">${data.error}</span>
+                    <br><br><span style="font-size:0.85rem; font-weight:normal; color: var(--text-muted);">Did you deploy the Apps Script as a "New Version"?</span>
+                </td></tr>`;
+                return;
+            }
+
             properties = data.properties || [];
             renderTable();
         } catch (error) {
             console.error("Error fetching data:", error);
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--danger);">Failed to load data. Please check your API URL.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--danger);">Failed to connect to Google Sheets. Check API URL.</td></tr>';
         }
     }
 
     async function processPropertyAction(actionType, propertyData) {
         try {
-            await fetch(API_URL, { 
+            const response = await fetch(API_URL, { 
                 method: 'POST', 
                 headers: { "Content-Type": "text/plain;charset=utf-8" }, 
                 redirect: "follow", 
                 body: JSON.stringify({ action: actionType, data: propertyData, user: currentUser }) 
             });
+            const data = await response.json();
+            
+            if (data.error) {
+                alert("Google Sheets Error: " + data.error);
+                return;
+            }
+
             await loadProperties(); 
         } catch (error) {
             console.error(`Error during ${actionType}:`, error);
@@ -322,7 +339,7 @@
         }
     }
 
-    window.recordPayment = async function(id, phone) {
+    window.recordPayment = async function(id, phone, rent, paidSoFar, tenant) {
         const inputEl = document.getElementById('pay_' + id);
         const amount = parseFloat(inputEl.value);
         
@@ -341,20 +358,22 @@
                 method: 'POST',
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 redirect: "follow",
-                body: JSON.stringify({ 
-                    action: 'RECORD_PAYMENT', 
-                    data: { id: id, amount: amount, rent: properties.find(p => p.id == id).rent }, 
-                    user: currentUser 
-                })
+                body: JSON.stringify({ action: 'RECORD_PAYMENT', data: { id: id, amount: amount }, user: currentUser })
             });
-
-            const responseData = await response.json();
+            const data = await response.json();
             
+            if (data.error) {
+                alert("Google Sheets Error: " + data.error);
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
+
             if (phone && String(phone).trim() !== '' && String(phone) !== 'undefined') {
                 const cleanPhone = String(phone).replace(/\D/g, ''); 
-                window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(responseData.textMessage)}`;
+                window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(data.textMessage)}`;
             } else {
-                alert('Payment saved!\n\nAuto-Message Generated:\n' + responseData.textMessage);
+                alert('Payment saved!\n\nAuto-Message Generated:\n' + data.textMessage);
             }
 
             await loadProperties();
@@ -389,7 +408,6 @@
             const pastDue = parseFloat(prop.pastDue) || 0;
             const dueDayNum = parseInt(dueDateStr) || 1; 
             
-            // Mark as behind if they owe old rent OR if it is past due date for current month
             prop._isBehind = (pastDue > 0) || ((paidThisMonth < rent) && (today > dueDayNum));
 
             if (prop._isBehind) countBehind++;
