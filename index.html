@@ -200,7 +200,8 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbywjXwTtKfFZycp2nxoGNNoFGLp_NdQ-9wVC2k4j7NpX9xeb3BSXesYCP-e3cbV1fO5tA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxpi2PV2SG1yYzvsjpDoiPI9HCZJ4hmRvftUhuiS9Bi8YDnLq6V65H-yefp34VC-rdVoQ/exec";
+    
     let properties = [];
     let currentUser = null;
     let currentFilter = 'all';
@@ -297,22 +298,25 @@
         tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--text-muted);">Syncing with Google Sheets...</td></tr>';
         try {
             const response = await fetch(API_URL + "?user=" + currentUser);
-            const data = await response.json();
+            const text = await response.text(); 
 
-            // Error Catching Display
-            if (data.error) {
-                console.error("Backend Error:", data.error);
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--danger); font-weight: bold; line-height: 1.6;">
-                    ⚠️ Google Apps Script Crash:<br><br><span style="color: var(--text-main); font-weight: normal;">${data.error}</span>
-                    <br><br><span style="font-size:0.85rem; font-weight:normal; color: var(--text-muted);">Did you deploy the Apps Script as a "New Version"?</span>
-                </td></tr>`;
-                return;
+            try {
+                const data = JSON.parse(text); 
+                if (data.error) {
+                    console.error("Backend Error:", data.error);
+                    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--danger); font-weight: bold; line-height: 1.6;">
+                        ⚠️ Google Apps Script Error:<br><br><span style="color: var(--text-main); font-weight: normal;">${data.error}</span>
+                    </td></tr>`;
+                    return;
+                }
+                properties = data.properties || [];
+                renderTable();
+            } catch (e) {
+                console.error("Google sent HTML instead of JSON. The deployment is broken.", text);
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--danger); line-height: 1.5;">⚠️ Google blocked the connection.<br><br>Did you deploy as "Anyone" and copy the new URL?</td></tr>`;
             }
-
-            properties = data.properties || [];
-            renderTable();
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("Network Error:", error);
             tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--danger);">Failed to connect to Google Sheets. Check API URL.</td></tr>';
         }
     }
@@ -325,10 +329,16 @@
                 redirect: "follow", 
                 body: JSON.stringify({ action: actionType, data: propertyData, user: currentUser }) 
             });
-            const data = await response.json();
+            const text = await response.text();
             
-            if (data.error) {
-                alert("Google Sheets Error: " + data.error);
+            try {
+                const data = JSON.parse(text);
+                if (data.error) {
+                    alert("Google Sheets Error: " + data.error);
+                    return;
+                }
+            } catch(e) {
+                alert("Google blocked the save. Make sure your deployment is set to 'Anyone'.");
                 return;
             }
 
@@ -339,7 +349,7 @@
         }
     }
 
-    window.recordPayment = async function(id, phone, rent, paidSoFar, tenant) {
+    window.recordPayment = async function(id, phone) {
         const inputEl = document.getElementById('pay_' + id);
         const amount = parseFloat(inputEl.value);
         
@@ -358,17 +368,31 @@
                 method: 'POST',
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 redirect: "follow",
-                body: JSON.stringify({ action: 'RECORD_PAYMENT', data: { id: id, amount: amount }, user: currentUser })
+                body: JSON.stringify({ 
+                    action: 'RECORD_PAYMENT', 
+                    data: { id: id, amount: amount, rent: properties.find(p => p.id == id).rent }, 
+                    user: currentUser 
+                })
             });
-            const data = await response.json();
+
+            const text = await response.text();
+            let data;
             
-            if (data.error) {
-                alert("Google Sheets Error: " + data.error);
+            try {
+                data = JSON.parse(text);
+                if (data.error) {
+                    alert("Google Sheets Error: " + data.error);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+            } catch(e) {
+                alert("Google blocked the payment. Make sure your deployment is set to 'Anyone'.");
                 btn.textContent = originalText;
                 btn.disabled = false;
                 return;
             }
-
+            
             if (phone && String(phone).trim() !== '' && String(phone) !== 'undefined') {
                 const cleanPhone = String(phone).replace(/\D/g, ''); 
                 window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(data.textMessage)}`;
