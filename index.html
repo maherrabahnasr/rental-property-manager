@@ -380,6 +380,12 @@
             
             try {
                 data = JSON.parse(text);
+                
+                // CHATGPT'S DEBUG LOGGING FIX:
+                if (data.debug) {
+                    console.log("Backend Math Debug:", data.debug);
+                }
+
                 if (data.error) {
                     alert("Google Sheets Error: " + data.error);
                     btn.textContent = originalText;
@@ -400,7 +406,10 @@
                 alert('Payment saved!\n\nAuto-Message Generated:\n' + data.textMessage);
             }
 
-            await loadProperties();
+            // CHATGPT'S UI TIMING FIX: Delay the GET request by 1 second so Google Sheets finishes saving
+            setTimeout(async () => {
+                await loadProperties();
+            }, 1000);
 
         } catch (error) {
             console.error(error);
