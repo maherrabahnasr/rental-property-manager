@@ -381,7 +381,6 @@
             try {
                 data = JSON.parse(text);
                 
-                // CHATGPT'S DEBUG LOGGING FIX:
                 if (data.debug) {
                     console.log("Backend Math Debug:", data.debug);
                 }
@@ -406,7 +405,6 @@
                 alert('Payment saved!\n\nAuto-Message Generated:\n' + data.textMessage);
             }
 
-            // CHATGPT'S UI TIMING FIX: Delay the GET request by 1 second so Google Sheets finishes saving
             setTimeout(async () => {
                 await loadProperties();
             }, 1000);
